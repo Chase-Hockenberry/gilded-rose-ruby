@@ -8,48 +8,69 @@ class GildedRose
   end
 
   def tick
-    if @name != "Aged Brie" and @name != "Backstage passes to a TAFKAL80ETC concert"
-      if @quality > 0
-        if @name != "Sulfuras, Hand of Ragnaros"
-          @quality = @quality - 1
-        end
-      end
+    update_quality
+    update_days_remaining unless sulfuras?
+  end
+
+  def update_quality
+    return if sulfuras?
+
+    if backstage_pass?
+      update_backstage_pass_quality
+    elsif aged_brie?
+      increase_quality
     else
-      if @quality < 50
-        @quality = @quality + 1
-        if @name == "Backstage passes to a TAFKAL80ETC concert"
-          if @days_remaining < 11
-            if @quality < 50
-              @quality = @quality + 1
-            end
-          end
-          if @days_remaining < 6
-            if @quality < 50
-              @quality = @quality + 1
-            end
-          end
-        end
-      end
+      decrease_quality
     end
-    if @name != "Sulfuras, Hand of Ragnaros"
-      @days_remaining = @days_remaining - 1
+  end
+
+  def update_backstage_pass_quality
+    if days_remaining > 10
+      increase_quality_by(1)
+    elsif days_remaining > 5
+      increase_quality_by(2)
+    elsif days_remaining > 0
+      increase_quality_by(3)
+    else
+      @quality = 0
     end
-    if @days_remaining < 0
-      if @name != "Aged Brie"
-        if @name != "Backstage passes to a TAFKAL80ETC concert"
-          if @quality > 0
-            if @name != "Sulfuras, Hand of Ragnaros"
-              @quality = @quality - 1
-            end
-          end
-        else
-          @quality = @quality - @quality
-        end
-      else
-        if @quality < 50
-          @quality = @quality + 1
-        end
-      end
+  end
+
+  def decrease_quality
+    return if quality == 0
+
+    if days_remaining <= 0
+      decrease_quality_by(2)
+    else
+      decrease_quality_by(1)
     end
+  end
+
+  def increase_quality
+    increase_quality_by(1) if quality < 50
+  end
+
+  def decrease_quality_by(value)
+    @quality -= value
+  end
+
+  def increase_quality_by(value)
+    @quality += value
+  end
+
+  def update_days_remaining
+    @days_remaining -= 1
+  end
+
+  def aged_brie?
+    name == "Aged Brie"
+  end
+
+  def backstage_pass?
+    name == "Backstage passes to a TAFKAL80ETC concert"
+  end
+
+  def sulfuras?
+    name == "Sulfuras, Hand of Ragnaros"
   end
 end
